@@ -93,12 +93,10 @@ function add_transaction(type, description, amount, date) {
     renderTransactions();
 }
 
-// Função para obter o saldo mensal
 function get_monthly_balance() {
-    return currentBalance; // Retorna o saldo atual (pode ser ajustado para cálculo mensal)
+    return currentBalance; 
 }
 
-// Função para prever o saldo do próximo mês
 function predict_next_month() {
     let totalIncome = 0;
     let totalExpenses = 0;
@@ -114,20 +112,19 @@ function predict_next_month() {
         }
     });
 
-    return currentBalance + totalIncome - totalExpenses; // Ajuste conforme necessário
+    return currentBalance + totalIncome - totalExpenses; 
 }
 
-// Atualiza a exibição do saldo atual e previsão do próximo mês
 function updateBalance() {
     document.getElementById("currentBalance").innerText = `R$ ${currentBalance.toFixed(2).replace(".", ",")}`;
-    const nextMonthPrediction = predict_next_month(); // Usa a previsão real
+    const nextMonthPrediction = predict_next_month(); 
     document.getElementById("nextMonthPrediction").innerText = `R$ ${nextMonthPrediction.toFixed(2).replace(".", ",")}`;
 }
 
-// Renderiza as transações na tabela
+
 function renderTransactions() {
     const tableBody = document.getElementById("transactionsBody");
-    tableBody.innerHTML = ""; // Limpa as transações anteriores
+    tableBody.innerHTML = ""; 
     transactions.forEach(transaction => {
         const row = document.createElement("tr");
         row.innerHTML = `
@@ -140,7 +137,6 @@ function renderTransactions() {
     });
 }
 
-// Gerencia o envio do formulário de transação
 document.getElementById("transactionForm").addEventListener("submit", function (event) {
     event.preventDefault();
     
@@ -149,31 +145,27 @@ document.getElementById("transactionForm").addEventListener("submit", function (
     const amount = document.getElementById("amount").value.trim();
     const date = document.getElementById("date").value.trim();
 
-    // Log para depuração
     console.log("Tipo:", type, "Descrição:", description, "Quantia:", amount, "Data:", date);
 
-    // Valida se todos os campos estão preenchidos
+
     if (!type || !description || !amount || !date) {
-        alert("Por favor, preencha todos os campos"); // Mensagem alterada
-        return; // Interrompe a execução se algum campo estiver vazio
+        alert("Por favor, preencha todos os campos"); 
+        return; 
     }
 
-    // Verifica se o valor de 'amount' é um número válido
-    const amountValue = parseFloat(amount.replace(',', '.')); // Converte a vírgula para ponto
+    const amountValue = parseFloat(amount.replace(',', '.')); 
     if (isNaN(amountValue) || amountValue <= 0) {
         alert("Por favor, insira um valor válido para a quantia");
-        return; // Interrompe a execução se 'amount' não for um número válido
+        return; 
     }
 
-    // Chama a função para adicionar a transação
-    add_transaction(type, description, amountValue, date); // Passa amountValue em vez de amount
+    add_transaction(type, description, amountValue, date); 
 
-    // Limpa o formulário e fecha o modal
+
     this.reset();
     document.getElementById("transactionModal").style.display = 'none';
 });
 
-// Eventos para abrir e fechar o modal
 document.getElementById("addIncomeBtn").addEventListener("click", function () {
     document.getElementById("transactionType").value = "Receita"; 
     document.getElementById("transactionModal").style.display = 'block'; 
@@ -194,6 +186,5 @@ window.onload = async function() {
     renderTransactions();
 };
 
-// Exporta a função add_transaction para uso externo
 export { initSync, add_transaction, get_monthly_balance, predict_next_month };
 export default __wbg_init;

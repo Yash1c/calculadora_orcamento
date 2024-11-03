@@ -1,4 +1,4 @@
-// src/transaction.rs
+
 use serde::{Deserialize, Serialize};
 use chrono::NaiveDate;
 

@@ -149,7 +149,6 @@ tr:hover {
   animation: fadeIn 0.5s ease-out;
 }
 
-/* Novos estilos para o modal */
 .modal {
   display: none;
   position: fixed;
@@ -268,16 +267,15 @@ function handleTransactionSubmit(e) {
     console.log('Amount:', amount);
     console.log('Date:', date);
 
-    // Verifique se todos os campos estão preenchidos
     if (!description || isNaN(amount) || !date) {
         alert('Por favor, preencha todos os campos corretamente.');
-        return; // Impede que o formulário seja enviado
+        return; 
     }
 
-    // Se todos os campos estiverem preenchidos corretamente, continue com a lógica de envio do formulário
-    add_transaction(description, amount, date); // Chame a função para adicionar a transação
-    closeTransactionModal(); // Feche o modal após salvar
-    updateDashboard(); // Atualize o painel
+
+    add_transaction(description, amount, date); 
+    closeTransactionModal();
+    updateDashboard(); 
 }
 
 function loadTransactions() {
@@ -287,7 +285,7 @@ function loadTransactions() {
 
 
 function updateDashboard() {
-    const transactions = []; // Você precisará implementar uma forma de obter todas as transações
+    const transactions = []; 
     const monthlyBalance = get_monthly_balance(transactions);
     const nextMonthPrediction = predict_next_month(transactions);
 
@@ -360,13 +358,12 @@ function updateTransactionsTable(transactions) {
               </tr>
           </thead>
           <tbody id="transactionsBody">
-              <!-- Transações serão inseridas aqui via JavaScript -->
           </tbody>
       </table>
   </div>
 </div>
 
-<!-- Modal para adicionar transação -->
+
 <div id="transactionModal" class="modal">
   <div class="modal-content">
       <h2>Nova Transação</h2>

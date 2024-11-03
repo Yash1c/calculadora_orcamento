@@ -1,4 +1,4 @@
-// src/wasm_interface.rs
+
 use wasm_bindgen::prelude::*;
 use serde_wasm_bindgen::{from_value, to_value};
 use crate::transaction::Transaction;
