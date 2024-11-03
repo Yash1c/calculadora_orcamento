@@ -1,0 +1,395 @@
+<html><head><base href="." /><title>Calculadora de Orçamento</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --primary: #2c3e50;
+  --secondary: #34495e;
+  --success: #27ae60;
+  --danger: #c0392b;
+  --light: #ecf0f1;
+  --dark: #2c3e50;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: var(--light);
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  background: var(--primary);
+  color: white;
+  padding: 2rem;
+  text-align: center;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.balance {
+  text-align: center;
+  font-size: 1.5rem;
+  padding: 20px;
+}
+
+.balance-amount {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.transactions {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background: var(--primary);
+  color: white;
+}
+
+tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+tr:hover {
+  background: #f5f5f5;
+}
+
+.form-group {
+  margin: 15px 0;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Novos estilos para o modal */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+  position: relative;
+  background: white;
+  max-width: 500px;
+  margin: 50px auto;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal h2 {
+  margin-bottom: 20px;
+  color: var(--primary);
+  border-bottom: 2px solid var(--light);
+  padding-bottom: 10px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--dark);
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--light);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.modal .btn {
+  min-width: 100px;
+}
+</style>
+<script type="module">
+  import init, { add_transaction, get_monthly_balance, predict_next_month } from './pkg/calculadora_orcamento.js';
+
+  async function main() {
+      await init();
+      setupEventListeners();
+      updateDashboard();
+  }
+
+  function setupEventListeners() {
+      document.getElementById('addIncomeBtn').addEventListener('click', () => {
+          openTransactionModal('Receita');
+      });
+
+      document.getElementById('addExpenseBtn').addEventListener('click', () => {
+      openTransactionModal('Despesa');
+      });
+
+      document.getElementById('transactionForm').addEventListener('submit', handleTransactionSubmit);
+
+      document.getElementById('cancelTransaction').addEventListener('click', closeTransactionModal);
+  }
+
+  function openTransactionModal(type) {
+    const modal = document.getElementById('transactionModal');
+    const titleElement = modal.querySelector('h2');
+    document.getElementById('transactionType').value = type;
+
+    titleElement.textContent = type === 'Receita' ? 'Nova Receita' : 'Nova Despesa';
+    modal.style.display = 'block';
+    document.getElementById('description').focus();
+}
+
+  function closeTransactionModal() {
+    const modal = document.getElementById('transactionModal');
+    modal.style.display = 'none';
+    document.getElementById('transactionForm').reset();
+}
+
+function handleTransactionSubmit(e) {
+    e.preventDefault();
+
+    const description = document.getElementById('description').value.trim();
+    const amount = parseFloat(document.getElementById('amount').value);
+    const date = document.getElementById('date').value;
+
+    console.log('Description:', description);
+    console.log('Amount:', amount);
+    console.log('Date:', date);
+
+    // Verifique se todos os campos estão preenchidos
+    if (!description || isNaN(amount) || !date) {
+        alert('Por favor, preencha todos os campos corretamente.');
+        return; // Impede que o formulário seja enviado
+    }
+
+    // Se todos os campos estiverem preenchidos corretamente, continue com a lógica de envio do formulário
+    add_transaction(description, amount, date); // Chame a função para adicionar a transação
+    closeTransactionModal(); // Feche o modal após salvar
+    updateDashboard(); // Atualize o painel
+}
+
+function loadTransactions() {
+    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+    updateTransactionsTable(transactions);
+}
+
+
+function updateDashboard() {
+    const transactions = []; // Você precisará implementar uma forma de obter todas as transações
+    const monthlyBalance = get_monthly_balance(transactions);
+    const nextMonthPrediction = predict_next_month(transactions);
+
+    document.getElementById('currentBalance').textContent = 
+        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+        .format(monthlyBalance);
+
+    document.getElementById('nextMonthPrediction').textContent = 
+        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+        .format(nextMonthPrediction);
+
+    updateTransactionsTable(transactions);
+}
+
+function updateTransactionsTable(transactions) {
+    const tableBody = document.getElementById('transactionsBody');
+    tableBody.innerHTML = '';
+    
+    transactions.forEach(transaction => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${transaction.description}</td>
+            <td>${transaction.type}</td>
+            <td>${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+            .format(transaction.amount)}</td>
+            <td>${transaction.date}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+  main();
+</script>
+</head>
+<body>
+<div class="header">
+  <h1>Calculadora de Orçamento Pessoal</h1>
+</div>
+
+<div class="container">
+  <div class="dashboard animate-fade-in">
+      <div class="card balance">
+          <h2>Saldo Atual</h2>
+          <div class="balance-amount" id="currentBalance">R$ 0,00</div>
+      </div>
+      <div class="card balance">
+          <h2>Previsão Próximo Mês</h2>
+          <div class="balance-amount" id="nextMonthPrediction">R$ 0,00</div>
+      </div>
+  </div>
+
+  <div class="buttons">
+      <button class="btn btn-success" id="addIncomeBtn">
+          <i class="fas fa-plus"></i> Adicionar Receita
+      </button>
+      <button class="btn btn-danger" id="addExpenseBtn">
+          <i class="fas fa-minus"></i> Adicionar Despesa
+      </button>
+  </div>
+
+  <div class="card transactions">
+      <h2>Transações Recentes</h2>
+      <table>
+          <thead>
+              <tr>
+                  <th>Descrição</th>
+                  <th>Categoria</th>
+                  <th>Valor</th>
+                  <th>Data</th>
+              </tr>
+          </thead>
+          <tbody id="transactionsBody">
+              <!-- Transações serão inseridas aqui via JavaScript -->
+          </tbody>
+      </table>
+  </div>
+</div>
+
+<!-- Modal para adicionar transação -->
+<div id="transactionModal" class="modal">
+  <div class="modal-content">
+      <h2>Nova Transação</h2>
+      <form id="transactionForm" novalidate>
+          <div class="form-group">
+              <label for="description">Descrição</label>
+              <input type="text" id="description" class="form-control" required>
+          </div>
+          <div class="form-group">
+              <label for="amount">Valor</label>
+              <input type="number" id="amount" class="form-control" step="0.01" min="0" required>
+          </div>
+          <div class="form-group">
+              <label for="date">Data</label>
+              <input type="date" id="date" class="form-control" required>
+          </div>
+          <input type="hidden" id="transactionType" required>
+          <div class="modal-buttons">
+              <button type="button" id="cancelTransaction" class="btn btn-danger">Cancelar</button>
+              <button type="submit" class="btn btn-success">Salvar</button>
+          </div>
+      </form>
+  </div>
+</div>
+</body>
+</html>

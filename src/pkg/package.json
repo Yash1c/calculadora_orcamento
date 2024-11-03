@@ -1,0 +1,15 @@
+{
+  "name": "calculadora_orcamento",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "calculadora_orcamento_bg.wasm",
+    "calculadora_orcamento.js",
+    "calculadora_orcamento.d.ts"
+  ],
+  "main": "calculadora_orcamento.js",
+  "types": "calculadora_orcamento.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
